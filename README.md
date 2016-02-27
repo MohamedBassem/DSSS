@@ -34,28 +34,28 @@ Decentralized Secure Storage System
 ## Protocol Definition
 
 - Server/Client communication (HTTP Endpoints)
-  - Who Has (GET /api/who-has?q=<hash>)
+  - Who Has (GET /api/who-has?q=&lt;hash&gt;)
     - JSON Response `{ addresses : ["X.X.X.X:Z", "Y.Y.Y.Y:Q"] }`
-  - Where to upload (GET /api/where-to-upload?size=<size>)
+  - Where to upload (GET /api/where-to-upload?size=&lt;size&gt;)
     - The response contain all the replicas to which the client should upload
     - JSON Response `{ addresses : ["X.X.X.X:Z", "Y.Y.Y.Y:Q"] }`
-  - Introduce Me (GET /api/introduce-me?to=<address>&hash=<hash>&size=<size>)
+  - Introduce Me (GET /api/introduce-me?to=&lt;address&gt;&hash=&lt;hash&gt;&size=&lt;size&gt;)
     - The response contains the key the client should use to contact the agent
     - JSON Response `{ introduction-key : "X.X.X.X:Z" }`
 
 - Server/Agent PING UPD connection for hole punching.
 
 - Server/Agent communication (Persistent TCP connection)
-  - Who has ("WHO_HAS <hash>")
+  - Who has ("WHO_HAS &lt;hash&gt;")
     - Response "(0|1)"
-  - Introduction Requests ("INTRODUCTION_REQUEST <address> <size> <hash>")
-    - Response ("<Introduction Key>")
+  - Introduction Requests ("INTRODUCTION_REQUEST &lt;address&gt; &lt;size&gt; &lt;hash&gt;")
+    - Response ("&lt;Introduction Key&gt;")
 
 - Server/Agent communication (TCP over UDP using hole punching)
-  - Upload Requests ("UPLOAD <Introduction Key> <hash> <data>")
+  - Upload Requests ("UPLOAD &lt;Introduction Key&gt; &lt;hash&gt; &lt;data&gt;")
     - Response ("Ok")
-  - Download Requests ("DOWNLOAD <hash>")
-    - Response ("<data>")
+  - Download Requests ("DOWNLOAD &lt;hash&gt;")
+    - Response ("&lt;data&gt;")
 
 ## Upload Flow
 
