@@ -64,7 +64,6 @@ func askForIntroduction(serverId, hash string, chunkSize int) string {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	fmt.Println(body, resp.Status)
 	data := struct {
 		IntroductionKey string `json:"introduction-key"`
 	}{}
