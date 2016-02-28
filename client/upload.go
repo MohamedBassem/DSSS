@@ -85,10 +85,10 @@ func uploadChunk(chunk []byte) error {
 
 	for _, server := range servers {
 		introductionKey := askForIntroduction(server, hash, len(chunk))
-		logger.Printf("Got introduction key for server %v : %v.\n", server, introductionKey)
 		if introductionKey == "" {
 			logger.Fatalf("Failed to get the introduction key for the server %v.\n", server)
 		}
+		logger.Printf("Got introduction key for server %v : %v.\n", server, introductionKey)
 
 		// Now it's time to start the actual upload... FARGHAAAAAAAAAAAAL!!
 
