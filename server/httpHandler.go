@@ -5,13 +5,20 @@ import (
 	"net/http"
 )
 
-func onlyGetHandler(next http.Handler) http.Handler {
+func onlyGetMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		} else {
 			next.ServeHTTP(w, r)
 		}
+	})
+}
+
+func loggingMiddelware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger.Printf("Got %v from %v\n", r.URL, r.RemoteAddr)
+		next.ServeHTTP(w, r)
 	})
 }
 
@@ -30,12 +37,12 @@ var introduceMeRequestHandler http.Handler = http.HandlerFunc(func(w http.Respon
 func initHTTP(httpPort int) {
 
 	apiMux := http.NewServeMux()
-	apiMux.Handle("/who-has", onlyGetHandler(whoHasRequestHandler))
-	apiMux.Handle("/where-to-upload", onlyGetHandler(whereToUploadRequestHandler))
-	apiMux.Handle("/introduce-me", onlyGetHandler(introduceMeRequestHandler))
+	apiMux.Handle("/who-has", onlyGetMiddleware(whoHasRequestHandler))
+	apiMux.Handle("/where-to-upload", onlyGetMiddleware(whereToUploadRequestHandler))
+	apiMux.Handle("/introduce-me", onlyGetMiddleware(introduceMeRequestHandler))
 
-	http.Handle("/api/", http.StripPrefix("/api", apiMux))
-	logger.Printf("Server is listening on port 0.0.0.0:%v\n", httpPort)
+	http.Handle("/api/", loggingMiddelware(http.StripPrefix("/api", apiMux)))
+	logger.Printf("Server is serving http on port 0.0.0.0:%v\n", httpPort)
 	http.ListenAndServe(fmt.Sprintf(":%v", httpPort), nil)
 
 }
