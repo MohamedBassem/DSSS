@@ -29,7 +29,7 @@ func main() {
 			Usage: "Uploads a file",
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Client ", log.LstdFlags)
-				client.Upload(c.Args().First(), logger)
+				client.Upload(c.Args().First(), c.Args().Get(1), logger)
 			},
 		},
 	}

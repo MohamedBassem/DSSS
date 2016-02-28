@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -72,7 +73,7 @@ func askForIntroduction(serverId, hash string, chunkSize int) string {
 	return data.IntroductionKey
 }
 
-func uploadChunk(chunk []byte) error {
+func uploadChunk(chunk []byte) (string, error) {
 
 	hash := getChunkHash(chunk)
 	logger.Printf("Uploading chunk with md5 %v\n", hash)
@@ -91,14 +92,18 @@ func uploadChunk(chunk []byte) error {
 		logger.Printf("Got introduction key for server %v : %v.\n", server, introductionKey)
 
 		// Now it's time to start the actual upload... FARGHAAAAAAAAAAAAL!!
-
 	}
 
-	return nil
+	return hash, nil
 }
 
-func Upload(filename string, l *log.Logger) {
+func Upload(filename, outputManifestName string, l *log.Logger) {
+
 	logger = l
+
+	if filename == "" || outputManifestName == "" {
+		logger.Fatalln("Both the file to upload and the output manifest name should be specified")
+	}
 
 	fileContent, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -117,8 +122,17 @@ func Upload(filename string, l *log.Logger) {
 		}
 	}
 
+	hashes := []string{}
 	for _, chunk := range chunks {
-		uploadChunk(encyptChunk(chunk))
+		hash, err := uploadChunk(encyptChunk(chunk))
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		hashes = append(hashes, hash)
 	}
+
+	manifestFileContent := strings.Join(hashes, "\n")
+	ioutil.WriteFile(outputManifestName, []byte(manifestFileContent), 0600)
+	logger.Printf("Done uploading, manifest file dumped in %v.\n", outputManifestName)
 
 }
