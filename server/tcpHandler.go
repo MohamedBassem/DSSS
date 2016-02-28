@@ -8,8 +8,6 @@ import (
 	"github.com/MohamedBassem/DSSS/tcpreadwriter"
 )
 
-const agentIdLength = 30
-
 type query struct {
 	text     string
 	response chan<- response

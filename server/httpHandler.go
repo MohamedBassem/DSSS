@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"time"
 )
@@ -69,7 +70,30 @@ MainLoop:
 })
 
 var whereToUploadRequestHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("HELLO"))
+
+	// TODO: Consider the size
+	agents := connectedAgents.getAllAgents()
+
+	if len(agents) < replicationFactor {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Number of online agents is smaller than the replication factor"))
+		return
+	}
+
+	var rep = replicationFactor
+
+	ret := []string{}
+	for ; rep > 0; rep-- {
+		idx := rand.Intn(len(agents))
+		ret = append(ret, agents[idx].id)
+		agents = append(agents[:idx], agents[idx+1:]...)
+	}
+
+	str, _ := json.Marshal(struct {
+		Addresses []string
+	}{Addresses: ret})
+	w.Write(str)
+
 })
 
 var introduceMeRequestHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
