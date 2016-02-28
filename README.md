@@ -78,3 +78,12 @@ Decentralized Secure Storage System
   - Contact one of the peers, the server sent, with a download request . ( TODO: Authenticate first )
   - Decrypt file.
 - Concat all parts and dump it.
+
+
+## Agent Connection Flow
+- Opens a TCP connection to the server.
+- Receives the "Hi <ID>" message from the server.
+- Opens a UDP connection with the server and periodically sending "PING <id>" in the background.
+- Responds to the queries sent by the server using the TCPReaderWriter package.
+- Responds to the special query "PING" by a "PONG", all encoded using the TCPReaderWriter.
+
