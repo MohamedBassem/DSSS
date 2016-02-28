@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -97,7 +98,56 @@ var whereToUploadRequestHandler http.Handler = http.HandlerFunc(func(w http.Resp
 })
 
 var introduceMeRequestHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("HELLO"))
+
+	to := r.FormValue("to")
+	sizeStr := r.FormValue("size")
+	hash := r.FormValue("hash")
+
+	if to == "" || sizeStr == "" || hash == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	size, err := strconv.Atoi(sizeStr)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	agent := connectedAgents.get(to)
+	if agent == nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	introductionRequest := IntroductionRequest{
+		Address: r.RemoteAddr,
+		Size:    size,
+		Hash:    hash,
+	}
+
+	responseChan := make(chan response, 1)
+	agent.queries <- query{
+		text:     introductionRequest.String(),
+		response: responseChan,
+	}
+
+	select {
+	case resp := <-responseChan:
+		if resp.err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		str, _ := json.Marshal(struct {
+			IntroductionKey string `json:introduction-key`
+		}{IntroductionKey: resp.text})
+		w.Write(str)
+	case <-time.After(time.Second * 3):
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 })
 
 func initHTTP(httpPort int) {
