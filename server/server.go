@@ -10,6 +10,7 @@ func Main(agentTCPPort, agentUDPPort, clientHTTPPort int, l *log.Logger) {
 
 	go initHTTP(clientHTTPPort)
 	go initUDP(agentUDPPort)
+	go initTCP(agentTCPPort)
 
 	<-make(chan struct{}, 0)
 }
