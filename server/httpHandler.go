@@ -140,7 +140,7 @@ var introduceMeRequestHandler http.Handler = http.HandlerFunc(func(w http.Respon
 			return
 		}
 		str, _ := json.Marshal(struct {
-			IntroductionKey string `json:introduction-key`
+			IntroductionKey string `json:"introduction-key"`
 		}{IntroductionKey: resp.text})
 		w.Write(str)
 	case <-time.After(time.Second * 3):
