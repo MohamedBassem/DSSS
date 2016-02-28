@@ -28,6 +28,19 @@ func (cg *ConnectedAgents) delete(id string) {
 	delete(cg.m, id)
 }
 
+func (cg *ConnectedAgents) getAllAgents() []*agent {
+	cg.mtx.Lock()
+	defer cg.mtx.Unlock()
+
+	ret := []*agent{}
+
+	for _, v := range cg.m {
+		ret = append(ret, v)
+	}
+
+	return ret
+}
+
 var connectedAgents ConnectedAgents = ConnectedAgents{
 	m:   make(map[string]*agent),
 	mtx: new(sync.Mutex),
