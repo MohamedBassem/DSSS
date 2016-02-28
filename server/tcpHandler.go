@@ -12,7 +12,7 @@ const agentIdLength = 30
 
 type query struct {
 	text     string
-	response chan response
+	response chan<- response
 }
 
 type response struct {
