@@ -52,11 +52,11 @@ MainLoop:
 	for i := range agents {
 		select {
 		case resp := <-responseChans[i]:
+			close(responseChans[i])
 			if resp.err != nil || resp.text != "1" {
 				continue MainLoop
 			}
 			ret = append(ret, agents[i].id)
-			close(responseChans[i])
 		default:
 		}
 	}
