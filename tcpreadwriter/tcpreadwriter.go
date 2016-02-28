@@ -31,6 +31,7 @@ func (t *TCPReadWriter) WriteMessage(message string) error {
 
 	fullMessageBytes := append(bs.Bytes(), messageBytes...)
 	_, err := t.readerWriter.Write(fullMessageBytes)
+	t.readerWriter.Flush()
 	return err
 }
 
@@ -47,7 +48,7 @@ func (t *TCPReadWriter) ReadMessage() (string, error) {
 
 	var messageLength int32
 	err = binary.Read(buf, binary.LittleEndian, &messageLength)
-	if err != nil {
+	if err != nil || messageLength < 0 {
 		return "", err
 	}
 
