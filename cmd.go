@@ -9,5 +9,5 @@ import (
 
 func main() {
 	logger := log.New(os.Stdout, "Server", log.LstdFlags)
-	server.Main(0, 0, 8081, logger)
+	server.Main(0, 8082, 8081, logger)
 }
