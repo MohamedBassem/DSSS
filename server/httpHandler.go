@@ -5,13 +5,24 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
+
+	"github.com/MohamedBassem/DSSS/internal/structs"
 )
 
 func onlyGetMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
+}
+
+func onlyPostMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
 			w.WriteHeader(http.StatusMethodNotAllowed)
 		} else {
 			next.ServeHTTP(w, r)
@@ -35,7 +46,7 @@ var whoHasRequestHandler http.Handler = http.HandlerFunc(func(w http.ResponseWri
 	}
 	agents := connectedAgents.getAllAgents()
 
-	whoHashRequest := WhoHasRequest{Hash: hash}
+	whoHashRequest := structs.WhoHasRequest{Hash: hash}
 
 	responseChans := make([]chan response, len(agents))
 	for i, agent := range agents {
@@ -97,57 +108,48 @@ var whereToUploadRequestHandler http.Handler = http.HandlerFunc(func(w http.Resp
 
 })
 
-var introduceMeRequestHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+var RelayRequestHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-	to := r.FormValue("to")
-	sizeStr := r.FormValue("size")
-	hash := r.FormValue("hash")
+	var request structs.UploadRequestJSON
 
-	if to == "" || sizeStr == "" || hash == "" {
+	if r.Body == nil {
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Request without a body"))
 		return
 	}
-
-	size, err := strconv.Atoi(sizeStr)
+	defer r.Body.Close()
+	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		w.Write([]byte("Failed to parse request body"))
 		return
 	}
 
-	agent := connectedAgents.get(to)
+	agent := connectedAgents.get(request.To)
 	if agent == nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Agent not found .."))
 		return
-	}
-
-	introductionRequest := IntroductionRequest{
-		Address: r.RemoteAddr,
-		Size:    size,
-		Hash:    hash,
 	}
 
 	responseChan := make(chan response, 1)
-	agent.queries <- query{
-		text:     introductionRequest.String(),
+	uploadRequest := structs.UploadRequest{Hash: request.Hash, Content: request.Content}
+	uploadQuery := query{
+		text:     uploadRequest.String(),
 		response: responseChan,
 	}
 
-	select {
-	case resp := <-responseChan:
-		if resp.err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		str, _ := json.Marshal(struct {
-			IntroductionKey string `json:"introduction-key"`
-		}{IntroductionKey: resp.text})
-		w.Write(str)
-	case <-time.After(time.Second * 3):
-		w.WriteHeader(http.StatusBadRequest)
+	agent.queries <- uploadQuery
+
+	response := <-responseChan
+
+	if response.err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(response.err.Error()))
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
 })
 
 func initHTTP(httpPort int) {
@@ -155,7 +157,7 @@ func initHTTP(httpPort int) {
 	apiMux := http.NewServeMux()
 	apiMux.Handle("/who-has", onlyGetMiddleware(whoHasRequestHandler))
 	apiMux.Handle("/where-to-upload", onlyGetMiddleware(whereToUploadRequestHandler))
-	apiMux.Handle("/introduce-me", onlyGetMiddleware(introduceMeRequestHandler))
+	apiMux.Handle("/relay", onlyPostMiddleware(RelayRequestHandler))
 
 	http.Handle("/api/", loggingMiddelware(http.StripPrefix("/api", apiMux)))
 	logger.Printf("Server is serving http on port 0.0.0.0:%v\n", httpPort)

@@ -1,6 +1,4 @@
-package server
-
-import "fmt"
+package structs
 
 type PingRequest struct{}
 
@@ -16,12 +14,11 @@ func (w *WhoHasRequest) String() string {
 	return "WHO_HAS " + w.Hash
 }
 
-type IntroductionRequest struct {
-	Address string
-	Size    int
+type UploadRequest struct {
 	Hash    string
+	Content string
 }
 
-func (i *IntroductionRequest) String() string {
-	return fmt.Sprintf("INTRODUCTION_REQUEST %v %v %v", i.Address, i.Size, i.Hash)
+func (u *UploadRequest) String() string {
+	return "UPLOAD " + u.Hash + " " + u.Content
 }
