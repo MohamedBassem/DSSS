@@ -1,21 +1,25 @@
 package client
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/MohamedBassem/DSSS/internal/structs"
 )
 
 const (
-	chunkSize                    = 100 // In bytes
-	discoveryServerBaseUrl       = "http://localhost:8081/api"
-	discoveryServerWhereToUpload = discoveryServerBaseUrl + "/where-to-upload"
-	discoveryServerIntroduceMe   = discoveryServerBaseUrl + "/introduce-me"
+	chunkSize                       = 100 // In bytes
+	discoveryServerBaseURL          = "http://localhost:8081/api"
+	discoveryServerWhereToUploadURL = discoveryServerBaseURL + "/where-to-upload"
+	relayURL                        = discoveryServerBaseURL + "/relay"
+	whoHasURL                       = discoveryServerBaseURL + "/who-has"
+	downloadURL                     = discoveryServerBaseURL + "/download"
 )
 
 var logger *log.Logger
@@ -33,7 +37,7 @@ func getChunkHash(chunk []byte) string {
 }
 
 func getUploadServers() []string {
-	resp, err := http.Get(discoveryServerWhereToUpload)
+	resp, err := http.Get(discoveryServerWhereToUploadURL)
 	if err != nil {
 		logger.Fatalln(err)
 	}
@@ -49,30 +53,6 @@ func getUploadServers() []string {
 	return data.Addresses
 }
 
-func askForIntroduction(serverId, hash string, chunkSize int) string {
-
-	queryString := fmt.Sprintf("?to=%v&size=%v&hash=%v", serverId, chunkSize, hash)
-
-	resp, err := http.Get(discoveryServerIntroduceMe + queryString)
-	if err != nil {
-		logger.Fatalln(err)
-	}
-
-	if resp.StatusCode != 200 {
-		return ""
-	}
-	defer resp.Body.Close()
-
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	data := struct {
-		IntroductionKey string `json:"introduction-key"`
-	}{}
-	json.Unmarshal(body, &data)
-
-	return data.IntroductionKey
-}
-
 func uploadChunk(chunk []byte) (string, error) {
 
 	hash := getChunkHash(chunk)
@@ -85,13 +65,23 @@ func uploadChunk(chunk []byte) (string, error) {
 	logger.Printf("This chunk should be uploaded to %v.\n", servers)
 
 	for _, server := range servers {
-		introductionKey := askForIntroduction(server, hash, len(chunk))
-		if introductionKey == "" {
-			logger.Fatalf("Failed to get the introduction key for the server %v.\n", server)
+		var req = structs.UploadRequestJSON{
+			To:      server,
+			Hash:    hash,
+			Content: string(chunk),
 		}
-		logger.Printf("Got introduction key for server %v : %v.\n", server, introductionKey)
 
-		// Now it's time to start the actual upload... FARGHAAAAAAAAAAAAL!!
+		reqJson, _ := json.Marshal(&req)
+
+		resp, err := (&http.Client{}).Post(relayURL, "application/json", bytes.NewReader(reqJson))
+
+		if err != nil || resp.StatusCode != 200 {
+			logger.Fatalln("Failed to upload to server : " + err.Error())
+		}
+
+		if resp.Body != nil {
+			resp.Body.Close()
+		}
 	}
 
 	return hash, nil

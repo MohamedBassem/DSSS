@@ -22,7 +22,7 @@ func main() {
 			Usage: "Starts the server",
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Server ", log.LstdFlags)
-				server.Main(8082, 8083, 8081, logger)
+				server.Main(8082, 8081, logger)
 			},
 		},
 		
@@ -37,6 +37,14 @@ func main() {
 		{
 			Name:  "upload",
 			Usage: "Uploads a file",
+			Action: func(c *cli.Context) {
+				logger := log.New(os.Stdout, "Client ", log.LstdFlags)
+				client.Upload(c.Args().First(), c.Args().Get(1), logger)
+			},
+		},
+		{
+			Name:  "download",
+			Usage: "Downloads a file",
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Client ", log.LstdFlags)
 				client.Upload(c.Args().First(), c.Args().Get(1), logger)
