@@ -27,22 +27,16 @@ func Main(l *log.Logger) {
 func startAgent(con *net.TCPConn) {
 
 	readWrite = tcpreadwriter.New(con)
-	msg, err:= readWrite.ReadMessage()
-	
-	if err != nil {
-		panic(err)
-	}
 
-	id := strings.Split(msg, " ")[1]
-	Logger.Println(id)
-
-	msg, err = readWrite.ReadMessage()
+	//id := strings.Split(msg, " ")[1]
+	//Logger.Println(id)
 
 	for true {
-		msg, err = readWrite.ReadMessage()
+		msg, err := readWrite.ReadMessage()
 		if err != nil {
 			panic(err)
 		}
+		Logger.Println(msg)
 	
 		arr := strings.Split(msg, " ")
 		cmd := arr[0]
