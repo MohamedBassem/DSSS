@@ -12,13 +12,13 @@ const (
 )
 
 
-var logger *log.Logger
+var Logger *log.Logger
 var readWrite *tcpreadwriter.TCPReadWriter
 
 
 func Main(l *log.Logger) {
 
-	logger = l
+	Logger = l
 	InitTCPCon(server)	
 
 }
@@ -33,7 +33,7 @@ func startAgent(con *net.TCPConn) {
 	}
 
 	id := strings.Split(msg, " ")[1]
-	logger.Println(id)
+	Logger.Println(id)
 
 	msg, err = readWrite.ReadMessage()
 
@@ -47,30 +47,29 @@ func startAgent(con *net.TCPConn) {
 		cmd := arr[0]
 
 		if cmd == "PING" {
-			ping()		
+			ping(arr)		
 		} else if cmd == "WHO_HAS" {
-			whoHas()
+			whoHas(arr)
 		} else if cmd == "UPLOAD" {
-			upload()
+			upload(arr)
 		}
 	}
 
 }
 
-func ping() {
-	logger.Println("PING")
+func ping(arr []string) {
+	Logger.Println("PING")
 	err := readWrite.WriteMessage("PONG")
 	if err != nil {
 		panic(err)
 	}
 }
 
-func whoHas() {
-
+func whoHas(arr []string) {
 }
 
-func upload() {
-
+func upload(arr []string) {
+	Store(arr[1], arr[2])
 }
 
 func InitTCPCon(servAddr string){
