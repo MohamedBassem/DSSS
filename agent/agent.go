@@ -8,7 +8,7 @@ import (
 )
 
 const (
-  server											 = "localhost:8082"
+  server = "localhost:8082"
 )
 
 
@@ -22,6 +22,7 @@ func Main(l *log.Logger) {
 	InitTCPCon(server)	
 
 }
+
 
 func startAgent(con *net.TCPConn) {
 
@@ -66,10 +67,24 @@ func ping(arr []string) {
 }
 
 func whoHas(arr []string) {
+	exists := HasHash(arr[1])
+	msg := "0"
+	if exists {
+		msg = "1"	
+	}
+	err := readWrite.WriteMessage(msg)
+	if err != nil {
+		panic(err)
+	}
 }
+
 
 func upload(arr []string) {
 	Store(arr[1], arr[2])
+	err := readWrite.WriteMessage("OK")
+	if err != nil {
+		panic(err)
+	}
 }
 
 func InitTCPCon(servAddr string){

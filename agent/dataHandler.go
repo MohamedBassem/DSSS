@@ -2,6 +2,7 @@ package agent
 
 import (
 	"io/ioutil"
+	"os"
 )
 
 const (
@@ -19,3 +20,11 @@ func Store(hash string, content string) {
 
 }
 
+
+func HshHash(hash string) bool {
+	_, err := os.Stat(datadir + hash)
+	if err != nil {
+		return true
+	}
+	return false
+}
