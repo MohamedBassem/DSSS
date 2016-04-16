@@ -61,7 +61,7 @@ func startAgent(con *net.TCPConn) {
 }
 
 func ping(arr []string) {
-	Logger.Println("PING")
+	Logger.Println("PING received")
 	err := readWrite.WriteMessage("PONG")
 	if err != nil {
 		panic(err)
@@ -69,6 +69,7 @@ func ping(arr []string) {
 }
 
 func whoHas(arr []string) {
+	Logger.Println("WHO_HAS recived")		
 	exists := HasHash(arr[1])
 	msg := "0"
 	if exists {
@@ -82,6 +83,7 @@ func whoHas(arr []string) {
 
 
 func upload(arr []string) {
+	Logger.Println("UPLOAD received")
 	Store(arr[1], strings.Join(arr[2:], ","))
 	err := readWrite.WriteMessage("OK")
 	if err != nil {
@@ -90,6 +92,7 @@ func upload(arr []string) {
 }
 
 func download(arr []string) {
+	Logger.Println("DOWNLOAD received")
 	cnt := Fetch(arr[1])
 	err := readWrite.WriteMessage(cnt)
 	if err != nil { panic(err) }
