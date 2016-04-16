@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/MohamedBassem/DSSS/agent"
 	"github.com/MohamedBassem/DSSS/client"
 	"github.com/MohamedBassem/DSSS/server"
-	"github.com/MohamedBassem/DSSS/agent"
 	"github.com/codegangsta/cli"
 )
 
@@ -25,9 +25,9 @@ func main() {
 				server.Main(8082, 8081, logger)
 			},
 		},
-		
+
 		{
-			Name: "agent",
+			Name:  "agent",
 			Usage: "Starts the Agent",
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Agent ", log.LstdFlags)
@@ -47,7 +47,7 @@ func main() {
 			Usage: "Downloads a file",
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Client ", log.LstdFlags)
-				client.Upload(c.Args().First(), c.Args().Get(1), logger)
+				client.Download(c.Args().First(), c.Args().Get(1), logger)
 			},
 		},
 	}

@@ -88,12 +88,14 @@ func Download(manifestFileName, outputFileName string, l *log.Logger) {
 	}
 
 	for _, hash := range chunkHashes {
-
+		logger.Printf("Trying to download chunk with hash %v.\n", hash)
 		servers, err := whoHas(hash)
+		logger.Printf("Chunk with hash %v is on %v.\n", hash, servers)
 		if err != nil {
 			logger.Fatalf("Failed to know who has %v with error %v\n", hash, err.Error())
 		}
 		encryptedChunk, err := downloadChunk(servers, hash)
+		logger.Printf("Chunk with hash %v downloaded.\n", hash)
 		if err != nil {
 			logger.Fatalf("Failed to download %v with error %v\n", hash, err.Error())
 		}
