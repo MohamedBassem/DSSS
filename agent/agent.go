@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	chunkSize                    = 100 // In bytes
   server											 = "localhost:8082"
 )
 
