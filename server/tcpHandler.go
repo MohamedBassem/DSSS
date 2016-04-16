@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/MohamedBassem/DSSS/tcpreadwriter"
 )
@@ -65,16 +66,16 @@ func handleTCPConnection(_conn *net.TCPConn) {
 			if err != nil {
 				return
 			}
-			//case <-time.After(time.Second * 3):
-			//err := readWriter.WriteMessage("PING")
-			//if err != nil {
-			//return
-			//}
-			//// TODO : Add Read Timeout
-			//message, err := readWriter.ReadMessage()
-			//if err != nil || message != "PONG" {
-			//return
-			//}
+		case <-time.After(time.Second * 3):
+			err := readWriter.WriteMessage("PING")
+			if err != nil {
+				return
+			}
+			// TODO : Add Read Timeout
+			message, err := readWriter.ReadMessage()
+			if err != nil || message != "PONG" {
+				return
+			}
 		}
 	}
 
