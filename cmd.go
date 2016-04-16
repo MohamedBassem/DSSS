@@ -6,6 +6,7 @@ import (
 
 	"github.com/MohamedBassem/DSSS/client"
 	"github.com/MohamedBassem/DSSS/server"
+	"github.com/MohamedBassem/DSSS/agent"
 	"github.com/codegangsta/cli"
 )
 
@@ -22,6 +23,15 @@ func main() {
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Server ", log.LstdFlags)
 				server.Main(8082, 8083, 8081, logger)
+			},
+		},
+		
+		{
+			Name: "agent",
+			Usage: "Starts the Agent",
+			Action: func(c *cli.Context) {
+				logger := log.New(os.Stdout, "Agent ", log.LstdFlags)
+				agent.Main(logger)
 			},
 		},
 		{
