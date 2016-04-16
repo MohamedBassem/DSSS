@@ -82,7 +82,7 @@ func whoHas(arr []string) {
 
 
 func upload(arr []string) {
-	Store(arr[1], arr[2])
+	Store(arr[1], strings.Join(arr[2:], ","))
 	err := readWrite.WriteMessage("OK")
 	if err != nil {
 		panic(err)

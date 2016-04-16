@@ -21,7 +21,7 @@ func Store(hash string, content string) {
 }
 
 
-func HshHash(hash string) bool {
+func HasHash(hash string) bool {
 	_, err := os.Stat(datadir + hash)
 	if err != nil {
 		return true
@@ -30,7 +30,7 @@ func HshHash(hash string) bool {
 }
 
 func Fetch(hash string) string {
-	exists := HshHash(hash)
+	exists := HasHash(hash)
 	if !exists {
 		return "ERROR Hash not found"
 	}
