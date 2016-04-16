@@ -28,5 +28,5 @@ type DownloadRequest struct {
 }
 
 func (d *DownloadRequest) String() string {
-	return "Download " + d.Hash
+	return "DOWNLOAD " + d.Hash
 }
