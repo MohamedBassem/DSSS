@@ -32,6 +32,14 @@ func main() {
 				client.Upload(c.Args().First(), c.Args().Get(1), logger)
 			},
 		},
+		{
+			Name:  "download",
+			Usage: "Downloads a file",
+			Action: func(c *cli.Context) {
+				logger := log.New(os.Stdout, "Client ", log.LstdFlags)
+				client.Upload(c.Args().First(), c.Args().Get(1), logger)
+			},
+		},
 	}
 	app.HideVersion = true
 

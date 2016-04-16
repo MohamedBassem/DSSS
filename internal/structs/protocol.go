@@ -22,3 +22,11 @@ type UploadRequest struct {
 func (u *UploadRequest) String() string {
 	return "UPLOAD " + u.Hash + " " + u.Content
 }
+
+type DownloadRequest struct {
+	Hash string
+}
+
+func (d *DownloadRequest) String() string {
+	return "Download " + d.Hash
+}

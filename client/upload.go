@@ -18,6 +18,8 @@ const (
 	discoveryServerBaseURL          = "http://localhost:8081/api"
 	discoveryServerWhereToUploadURL = discoveryServerBaseURL + "/where-to-upload"
 	relayURL                        = discoveryServerBaseURL + "/relay"
+	whoHasURL                       = discoveryServerBaseURL + "/who-has"
+	downloadURL                     = discoveryServerBaseURL + "/download"
 )
 
 var logger *log.Logger
@@ -69,9 +71,9 @@ func uploadChunk(chunk []byte) (string, error) {
 			Content: string(chunk),
 		}
 
-		json, _ := json.Marshal(&req)
+		reqJson, _ := json.Marshal(&req)
 
-		resp, err := (&http.Client{}).Post(relayURL, "application/json", bytes.NewReader(json))
+		resp, err := (&http.Client{}).Post(relayURL, "application/json", bytes.NewReader(reqJson))
 
 		if err != nil || resp.StatusCode != 200 {
 			logger.Fatalln("Failed to upload to server : " + err.Error())
