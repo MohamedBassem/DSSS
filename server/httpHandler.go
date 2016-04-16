@@ -59,7 +59,7 @@ var whoHasRequestHandler http.Handler = http.HandlerFunc(func(w http.ResponseWri
 		}
 	}
 
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 1)
 
 	ret := []string{}
 MainLoop:
