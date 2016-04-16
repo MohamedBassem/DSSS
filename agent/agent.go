@@ -53,6 +53,8 @@ func startAgent(con *net.TCPConn) {
 			whoHas(arr)
 		} else if cmd == "UPLOAD" {
 			upload(arr)
+		} else if cmd == "DOWNLOAD" {
+			download(arr)
 		}
 	}
 
@@ -85,6 +87,12 @@ func upload(arr []string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func download(arr []string) {
+	cnt := Fetch(arr[1])
+	err := readWrite.WriteMessage(cnt)
+	if err != nil { panic(err) }
 }
 
 func InitTCPCon(servAddr string){
