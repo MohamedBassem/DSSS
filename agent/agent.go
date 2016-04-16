@@ -67,6 +67,7 @@ func whoHas(arr []string) {
 	exists := HasHash(arr[1])
 	msg := "0"
 	if exists {
+		Logger.Println("Hash found")
 		msg = "1"	
 	}
 	err := readWrite.WriteMessage(msg)
@@ -90,6 +91,7 @@ func download(arr []string) {
 	cnt := Fetch(arr[1])
 	err := readWrite.WriteMessage(cnt)
 	if err != nil { panic(err) }
+	Logger.Println("Content Sent")
 }
 
 func InitTCPCon(servAddr string){

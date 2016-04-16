@@ -36,7 +36,7 @@ func main() {
 		},
 		{
 			Name:  "upload",
-			Usage: "Uploads a file",
+			Usage: "<file_name> <output_mainifist_name>",
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Client ", log.LstdFlags)
 				client.Upload(c.Args().First(), c.Args().Get(1), logger)
