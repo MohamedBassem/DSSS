@@ -24,9 +24,9 @@ func Store(hash string, content string) {
 func HasHash(hash string) bool {
 	_, err := os.Stat(datadir + hash)
 	if err != nil {
-		return true
+		return false
 	}
-	return false
+	return true
 }
 
 func Fetch(hash string) string {
