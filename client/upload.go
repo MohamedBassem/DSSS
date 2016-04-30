@@ -3,8 +3,13 @@ package client
 import (
 	"bytes"
 	"crypto/md5"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -24,9 +29,13 @@ const (
 
 var logger *log.Logger
 
-func encyptChunk(chunk []byte) []byte {
-	// TODO: Do the encryption
-	return chunk
+func encyptChunk(chunk []byte, pubKey *rsa.PublicKey) ([]byte, error) {
+	tmp, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, pubKey, chunk, []byte(EncryptionDecryptionLabel))
+	if err != nil {
+		return nil, err
+	}
+	str := base64.StdEncoding.EncodeToString(tmp)
+	return []byte(str), nil
 }
 
 func getChunkHash(chunk []byte) string {
@@ -76,7 +85,11 @@ func uploadChunk(chunk []byte) (string, error) {
 		resp, err := (&http.Client{}).Post(relayURL, "application/json", bytes.NewReader(reqJson))
 
 		if err != nil || resp.StatusCode != 200 {
-			logger.Fatalln("Failed to upload to server : " + err.Error())
+			if err != nil {
+				logger.Fatalln("Failed to upload to server : " + err.Error())
+			} else {
+				logger.Fatalln("Failed to upload to server : ", resp.StatusCode)
+			}
 		}
 
 		if resp.Body != nil {
@@ -87,12 +100,17 @@ func uploadChunk(chunk []byte) (string, error) {
 	return hash, nil
 }
 
-func Upload(filename, outputManifestName string, l *log.Logger) {
+func Upload(filename, outputManifestName, privateKeyFilePath string, l *log.Logger) {
 
 	logger = l
 
-	if filename == "" || outputManifestName == "" {
-		logger.Fatalln("Both the file to upload and the output manifest name should be specified")
+	if filename == "" || outputManifestName == "" || privateKeyFilePath == "" {
+		logger.Fatalln("The file to upload ,output manifest name and the privateKeyFilePath should be specified")
+	}
+
+	_, pubKey, err := ParsePrivateKey(privateKeyFilePath)
+	if err != nil {
+		logger.Fatalf("Failed to parse private key : %v\n", err.Error())
 	}
 
 	fileContent, err := ioutil.ReadFile(filename)
@@ -114,7 +132,13 @@ func Upload(filename, outputManifestName string, l *log.Logger) {
 
 	hashes := []string{}
 	for _, chunk := range chunks {
-		hash, err := uploadChunk(encyptChunk(chunk))
+		encChunk, err := encyptChunk(chunk, pubKey)
+		fmt.Println(len(encChunk))
+
+		if err != nil {
+			logger.Fatalln(err)
+		}
+		hash, err := uploadChunk(encChunk)
 		if err != nil {
 			logger.Fatalln(err)
 		}

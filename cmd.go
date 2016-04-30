@@ -36,18 +36,18 @@ func main() {
 		},
 		{
 			Name:  "upload",
-			Usage: "<file_name> <output_mainifist_name>",
+			Usage: "<file_name> <output_mainifist_name> <private_key>",
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Client ", log.LstdFlags)
-				client.Upload(c.Args().First(), c.Args().Get(1), logger)
+				client.Upload(c.Args().First(), c.Args().Get(1), c.Args().Get(2), logger)
 			},
 		},
 		{
 			Name:  "download",
-			Usage: "Downloads a file",
+			Usage: "<manifest_name> <output_file> <private_key>",
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Client ", log.LstdFlags)
-				client.Download(c.Args().First(), c.Args().Get(1), logger)
+				client.Download(c.Args().First(), c.Args().Get(1), c.Args().Get(2), logger)
 			},
 		},
 	}

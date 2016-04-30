@@ -2,8 +2,13 @@ package client
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -63,16 +68,29 @@ func downloadChunk(servers []string, hash string) (string, error) {
 	return respBody.Content, nil
 }
 
-func decryptChunk(chunk string) (string, error) {
-	return chunk, nil
+func decryptChunk(chunk string, privKey *rsa.PrivateKey) (string, error) {
+	tmp, err := base64.StdEncoding.DecodeString(chunk)
+	if err != nil {
+		return "", err
+	}
+	plain, err := rsa.DecryptOAEP(sha256.New(), rand.Reader, privKey, tmp, []byte(EncryptionDecryptionLabel))
+	if err != nil {
+		return "", err
+	}
+	return string(plain), nil
 }
 
-func Download(manifestFileName, outputFileName string, l *log.Logger) {
+func Download(manifestFileName, outputFileName, privateKeyFilePath string, l *log.Logger) {
 
 	logger = l
 
-	if manifestFileName == "" || outputFileName == "" {
-		logger.Fatalln("Both the manifestFileName and the outputFileName should be specified")
+	if manifestFileName == "" || outputFileName == "" || privateKeyFilePath == "" {
+		logger.Fatalln("The manifestFileName, outputFileName and privateKeyFilePath should be specified")
+	}
+
+	privKey, _, err := ParsePrivateKey(privateKeyFilePath)
+	if err != nil {
+		logger.Fatalf("Failed to parse private key : %v\n", err.Error())
 	}
 
 	manifestFileContent, err := ioutil.ReadFile(manifestFileName)
@@ -94,12 +112,16 @@ func Download(manifestFileName, outputFileName string, l *log.Logger) {
 		if err != nil {
 			logger.Fatalf("Failed to know who has %v with error %v\n", hash, err.Error())
 		}
+		if len(servers) == 0 {
+			logger.Fatalf("Failed to download %v no online servers having this chunk\n", hash)
+		}
 		encryptedChunk, err := downloadChunk(servers, hash)
 		logger.Printf("Chunk with hash %v downloaded.\n", hash)
 		if err != nil {
 			logger.Fatalf("Failed to download %v with error %v\n", hash, err.Error())
 		}
-		chunk, err := decryptChunk(encryptedChunk)
+		fmt.Println(len([]byte(encryptedChunk)))
+		chunk, err := decryptChunk(encryptedChunk, privKey)
 		if err != nil {
 			logger.Fatalf("Failed to decrypt %v with error %v\n", hash, err.Error())
 		}
