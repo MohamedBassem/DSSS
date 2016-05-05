@@ -8,16 +8,17 @@ import (
 	"github.com/MohamedBassem/DSSS/tcpreadwriter"
 )
 
-const (
-	server = "localhost:8082"
-)
-
 var Logger *log.Logger
 var readWrite *tcpreadwriter.TCPReadWriter
+var server string
 
-func Main(l *log.Logger) {
+func Main(l *log.Logger, addr string) {
 
 	Logger = l
+	server = addr
+	if server == "" {
+		Logger.Fatalln("You should specify the server's address (e.g. localhost:8082)")
+	}
 	InitTCPCon(server)
 
 }

@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -120,7 +119,6 @@ func Download(manifestFileName, outputFileName, privateKeyFilePath string, l *lo
 		if err != nil {
 			logger.Fatalf("Failed to download %v with error %v\n", hash, err.Error())
 		}
-		fmt.Println(len([]byte(encryptedChunk)))
 		chunk, err := decryptChunk(encryptedChunk, privKey)
 		if err != nil {
 			logger.Fatalf("Failed to decrypt %v with error %v\n", hash, err.Error())

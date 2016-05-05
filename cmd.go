@@ -31,7 +31,7 @@ func main() {
 			Usage: "Starts the Agent",
 			Action: func(c *cli.Context) {
 				logger := log.New(os.Stdout, "Agent ", log.LstdFlags)
-				agent.Main(logger)
+				agent.Main(logger, c.Args().First())
 			},
 		},
 		{

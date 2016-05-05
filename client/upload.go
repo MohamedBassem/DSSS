@@ -9,7 +9,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -20,7 +19,7 @@ import (
 
 const (
 	chunkSize                       = 100 // In bytes
-	discoveryServerBaseURL          = "http://localhost:8081/api"
+	discoveryServerBaseURL          = "http://0.0.0.0:8081/api"
 	discoveryServerWhereToUploadURL = discoveryServerBaseURL + "/where-to-upload"
 	relayURL                        = discoveryServerBaseURL + "/relay"
 	whoHasURL                       = discoveryServerBaseURL + "/who-has"
@@ -133,7 +132,6 @@ func Upload(filename, outputManifestName, privateKeyFilePath string, l *log.Logg
 	hashes := []string{}
 	for _, chunk := range chunks {
 		encChunk, err := encyptChunk(chunk, pubKey)
-		fmt.Println(len(encChunk))
 
 		if err != nil {
 			logger.Fatalln(err)
